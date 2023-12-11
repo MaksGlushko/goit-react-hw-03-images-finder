@@ -1,47 +1,34 @@
 import { Component } from 'react';
-import './Searchbar.modules.css';
+import { BsSearch } from 'react-icons/bs';
+import { toast } from 'react-toastify';
 
-export default class Searchbar extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      query: '',
-    };
-  }
-
-  handleChange = e => {
-    const userInput = e.currentTarget.value.toLowerCase().trim();
-    this.setState({ query: userInput });
-    // console.log(this.state.query);
-  };
-
-  handleSubmit = e => {
+export class Searchbar extends Component {
+  handleSearchSubmit = e => {
     e.preventDefault();
-    const { query } = this.state;
-    this.props.onSubmit(query);
-    // console.log(this.state.query);
+    const searchedImagesName =
+      e.currentTarget.elements.searchedImagesName.value;
+    if (searchedImagesName.trim() === '') {
+      return toast.warning(`Cannot be empty`, { theme: 'colored' });
+    }
+    this.props.saveSearchedImagesNameInState(searchedImagesName);
+    e.currentTarget.reset();
   };
 
   render() {
     return (
       <header className="Searchbar">
-        <form className="SearchForm" onSubmit={this.handleSubmit}>
+        <form className="SearchForm" onSubmit={this.handleSearchSubmit}>
           <button type="submit" className="SearchForm-button">
-            <span className="SearchForm-button-label">Search</span>
+            <span className="SearchForm-button-label "></span> <BsSearch />
           </button>
-          <label
-            className="SearchForm-button-label"
-            htmlFor="text-search"
-          ></label>
+
           <input
-            name="text-search"
             className="SearchForm-input"
             type="text"
+            name="searchedImagesName"
             autoComplete="off"
             autoFocus
             placeholder="Search images and photos"
-            onChange={this.handleChange}
           />
         </form>
       </header>

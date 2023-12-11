@@ -1,49 +1,29 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import './Modal.modules.css';
 
-class Modal extends Component {
-  handleBackdropClose = e => {
-    if (e.target === e.currentTarget) {
-      this.props.modalClose();
-    }
-  };
-
-  handleKeyDown = e => {
-    if (e.code === 'Escape') {
-      this.props.modalClose();
-    }
-  };
-
+export class Modal extends Component {
   componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown);
+    window.addEventListener('keydown', this.onKeyDown);
   }
-
   componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyDown);
+    window.removeEventListener('keydown', this.onKeyDown);
   }
-
+  onOverlayClick = e => {
+    if (e.currentTarget === e.target) {
+      this.props.onCloseModal();
+    }
+  };
+  onKeyDown = e => {
+    if (e.code === 'Escape') {
+      this.props.onCloseModal();
+    }
+  };
   render() {
-    const { largeImageURL, tags } = this.props;
-
     return (
-      <div className="Overlay" onClick={this.handleBackdropClose}>
+      <div className="Overlay" onClick={this.onOverlayClick}>
         <div className="Modal">
-          <img src={largeImageURL} alt={tags} />
+          <img src={this.props.data} alt="images" width={850} />
         </div>
       </div>
     );
   }
 }
-
-Modal.defaultProps = {
-  largeImageURL: 'https://picsum.photos/100%/260',
-  tags: 'This is a default image. I am sorry, the image you searched is not available.',
-};
-
-Modal.propTypes = {
-  largeImageURL: PropTypes.string,
-  tags: PropTypes.string,
-};
-
-export default Modal;

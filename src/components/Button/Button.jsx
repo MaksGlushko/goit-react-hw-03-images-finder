@@ -1,31 +1,15 @@
-import { string } from 'prop-types';
-import './Button.modules.css';
+import React, { Component } from 'react';
 
-const Button = props => {
-  const { text, type, clickHandler } = props;
-
-  return (
-    <div className="Center-buttons">
+export class Button extends Component {
+  render() {
+    return (
       <button
+        type="button"
         className="Button"
-        type={type}
-        onClick={clickHandler}
-        aria-label={text}
+        onClick={this.props.fetchMoreImages}
       >
-        {text}
+        Load more
       </button>
-    </div>
-  );
-};
-
-Button.defaultProps = {
-  type: 'button',
-  text: 'click me',
-};
-
-Button.propTypes = {
-  type: string,
-  text: string,
-};
-
-export default Button;
+    );
+  }
+}
