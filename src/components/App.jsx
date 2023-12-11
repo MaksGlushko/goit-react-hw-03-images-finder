@@ -7,6 +7,7 @@ import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
+
 export class App extends Component {
   state = {
     images: [],
@@ -19,7 +20,8 @@ export class App extends Component {
     },
     page: 1,
     loadMore: false,
-  };
+  }; 
+  
   fetchMoreImages = () => {
     this.setState(prevState => {
       return { page: prevState.page + 1 };
@@ -133,3 +135,4 @@ export class App extends Component {
     );
   }
 }
+export default App;
