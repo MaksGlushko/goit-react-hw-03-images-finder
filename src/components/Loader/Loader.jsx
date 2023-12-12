@@ -1,11 +1,10 @@
-import { InfinitySpin } from 'react-loader-spinner';
-
-const Loader = () => {
+export const Loader = () => {
   return (
-    <div className="Center">
-      <InfinitySpin width="350" color="#3f51b5" />
-    </div>
-  );
-};
-
-export default Loader;
+      <div className="Loader-overlay">
+          <div className="Loader">
+               <div className="Section-left"></div>
+              <div className="Section-right"></div>
+          </div>
+      </div>
+      )
+}

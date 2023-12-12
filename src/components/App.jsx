@@ -1,138 +1,90 @@
 import React, { Component } from 'react';
-import { MagnifyingGlass } from 'react-loader-spinner';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { fetchImagesByCategories } from './api';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
+import { Loader } from './Loader/Loader';
 import { Modal } from './Modal/Modal';
+import { fetchImages } from './api';
+
+const perPage = 12;
 
 export class App extends Component {
+    constructor(props) {
+    super(props);
+    this.myApp = React.createRef();
+  }
   state = {
     images: [],
-    isLoading: false,
-    error: null,
-    searchedImagesName: null,
-    modal: {
-      isOpen: false,
-      data: null,
-    },
+    query: '',
     page: 1,
-    loadMore: false,
-  }; 
-  
-  fetchMoreImages = () => {
-    this.setState(prevState => {
-      return { page: prevState.page + 1 };
-    });
+    isLoading: false,
+    showModal: false,
+    selectedImage: '',
+    totalCount: 0,
   };
 
-  saveSearchedImagesNameInState = searchedImagesName => {
+  handleSearchSubmit = (query) => {
     this.setState({
-      searchedImagesName: searchedImagesName,
+      query: query,
       images: [],
       page: 1,
+      totalCount: 0,
+      selectedImage: '',
     });
   };
-  fetchByName = async () => {
-    try {
-      this.setState({ isLoading: true });
-      const data = await fetchImagesByCategories(
-        this.state.searchedImagesName,
-        this.state.page
-      );
-      const imagesByCategories = data.hits;
-      if (data.hits.length === 0) {
-        this.setState({
-          loadMore: false,
-          error: toast.warning(
-            `Images weren't found! Please enter another name.`,
-            { theme: 'colored' }
-          ),
-        });
-        return;
-      }
-      this.setState(prevState => ({
-        images: [...prevState.images, ...imagesByCategories],
-        loadMore: this.state.page < Math.ceil(data.totalHits / 12),
-      }));
-      if (this.state.page === Math.ceil(data.totalHits / 12)) {
-        this.setState({
-          error: toast.info('The images is finished'),
-        });
-      }
-    } catch (error) {
-      this.setState({
-        error: toast.error(error.message, { theme: 'colored' }),
-      });
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  };
 
-  componentDidUpdate(_, prevState) {
-    if (
-      this.state.page !== prevState.page ||
-      this.state.searchedImagesName !== prevState.searchedImagesName
-    ) {
-      this.fetchByName();
-    }
+  handleLoadMore = () => {
+    this.setState(prev => {
+      return { page: prev.page + 1 };
+    });
   }
-  onOpenModal = modalData => {
-    this.setState({
-      modal: {
-        isOpen: true,
-        data: modalData,
-      },
-    });
-  };
-  onCloseModal = () => {
-    this.setState({
-      modal: {
-        isOpen: false,
-        data: null,
-      },
-    });
-  };
-  render() {
-    return (
-      <>
-        <Searchbar
-          saveSearchedImagesNameInState={this.saveSearchedImagesNameInState}
-        />
-        {this.state.isLoading && (
-          <MagnifyingGlass
-            visible={true}
-            height="80"
-            width="80"
-            ariaLabel="MagnifyingGlass-loading"
-            wrapperStyle={{}}
-            wrapperClass="MagnifyingGlass-wrapper"
-            glassColor="#c0efff"
-            color="#e15b64"
-          />
-        )}
 
-       
-        {this.state.images.length !== 0 && (
-          <ImageGallery
-            images={this.state.images}
-            onOpenModal={this.onOpenModal}
-          />
-        )}
-        {this.state.loadMore && (
-          <Button fetchMoreImages={this.fetchMoreImages} />
-        )}
-        {this.state.modal.isOpen && (
-          <Modal
-            data={this.state.modal.data}
-            onCloseModal={this.onCloseModal}
-          />
-        )}
-         {this.state.error && <ToastContainer />}
-      </>
+  handleImageClick = (imageUrl) => {
+    this.setState({ showModal: true, selectedImage: imageUrl });
+  }
+
+  handleCloseModal = () => {
+    this.setState({ showModal: false, selectedImage: '' });
+  }
+
+  componentDidUpdate(prevProp, prevState) {
+    if (prevState.query !== this.state.query || prevState.page !== this.state.page) {
+      this.setState({ isLoading: true });
+      fetchImages(this.state.query, this.state.page, perPage)
+        .then(responce => {
+          if (responce.data.totalHits === 0) return alert('No data for this search');
+          this.setState(prev => {
+            return {
+              images: [...prev.images, ...responce.data.hits],
+              totalCount: responce.data.totalHits,
+              isLoading: false,
+            };
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching images:', error);
+        }); 
+    }
+     window.scrollTo(0, this.myApp.current.scrollHeight);
+}
+  
+  render() {
+    const { images, isLoading, showModal, selectedImage } = this.state;
+
+    return (
+      <div className='App' ref={this.myApp}>
+        
+        <Searchbar onSubmit={this.handleSearchSubmit} />
+
+        <ImageGallery images={images} onImageClick={this.handleImageClick} />
+
+        {isLoading && <Loader />}
+
+        {this.state.totalCount > perPage &&
+          this.state.page * perPage < this.state.totalCount && !isLoading && <Button onClick={this.handleLoadMore} />}
+
+        {showModal && <Modal isOpen={showModal} image={selectedImage} onClose={this.handleCloseModal} />}
+      </div>
     );
   }
 }
-export default App;

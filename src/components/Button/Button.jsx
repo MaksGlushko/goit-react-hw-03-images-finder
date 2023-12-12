@@ -1,15 +1,9 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-export class Button extends Component {
-  render() {
-    return (
-      <button
-        type="button"
-        className="Button"
-        onClick={this.props.fetchMoreImages}
-      >
-        Load more
-      </button>
-    );
-  }
-}
+export const Button = ({ onClick, disabled }) => {
+  return (
+    <button type="button" className="Button" onClick={onClick} disabled={disabled}>
+      Load more
+    </button>
+  );
+};
